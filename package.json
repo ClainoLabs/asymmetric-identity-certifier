@@ -1,0 +1,30 @@
+{
+  "name": "asymmetric-identity-certifier",
+  "version": "1.0.0",
+  "description": "Canister to get users IC identity using asymmetric cryptography",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "npx tsx scripts/test.mts",
+    "get-key-pair": "npx tsx scripts/get-key-pair.mts",
+    "deploy": "npx tsx scripts/deploy.mts",
+    "generate": "scripts/generate_did.sh && dfx generate"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ClainoLabs/asymmetric-identity-certifier.git"
+  },
+  "author": "Alexandru Popescu <ad.popescu338@yahoo.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ClainoLabs/asymmetric-identity-certifier/issues"
+  },
+  "homepage": "https://github.com/ClainoLabs/asymmetric-identity-certifier#readme",
+  "devDependencies": {
+    "@dfinity/candid": "^2.4.1",
+    "@noble/secp256k1": "^2.2.3",
+    "@types/node": "^22.14.1",
+    "clipboardy": "^4.0.0",
+    "inquirer": "^12.5.2"
+  }
+}

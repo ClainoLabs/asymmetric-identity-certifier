@@ -1,0 +1,7 @@
+type InitArgs = record { local_mode : bool; public_key_hex : text };
+service : (InitArgs) -> {
+  documentation : () -> (text) query;
+  get_certified_identity : () -> (text);
+  get_ecdsa_public_key_hex : () -> (text) query;
+  init_ecdsa_key : () -> ();
+}

@@ -1,9 +1,15 @@
 {
   "canisters": {
-    "asymmetric-identity-certifier-backend": {
-      "candid": "src/asymmetric-identity-certifier-backend/asymmetric-identity-certifier-backend.did",
-      "package": "asymmetric-identity-certifier-backend",
-      "type": "rust"
+    "asymmetric_identity_certifier": {
+      "candid": "src/asymmetric_identity_certifier.did",
+      "package": "asymmetric_identity_certifier",
+      "type": "rust",
+      "declarations": {
+        "bindings": null,
+        "env_override": null,
+        "node_compatibility": false,
+        "output": "./src/declarations"
+      }
     }
   },
   "defaults": {
