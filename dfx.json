@@ -1,0 +1,17 @@
+{
+  "canisters": {
+    "asymmetric-identity-certifier-backend": {
+      "candid": "src/asymmetric-identity-certifier-backend/asymmetric-identity-certifier-backend.did",
+      "package": "asymmetric-identity-certifier-backend",
+      "type": "rust"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
