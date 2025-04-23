@@ -1,35 +1,61 @@
-import { generateKeyPair } from './utils/get-key-pair-from-input.js';
-import { deployCanister } from './utils/deploy-utils.js';
+import { buildArgument, deployCanister } from './utils/deploy-utils.js';
 import { execSync } from 'child_process';
-import * as secp from '@noble/secp256k1';
+import { generateAesSymmetricEncryptionKeyHex } from './utils/get-aes-key-from-input.js';
+import { decryptCertificate } from './utils/decrypt-certificate.js';
+import { validateSignature } from './utils/validate-signature.js';
+import assert from 'assert';
 
 const cleanupStringResponse = (response: string) => {
-  return response.replaceAll('"', '').replaceAll('(', '').replaceAll(')', '');
+  return response
+    .replaceAll('"', '')
+    .replaceAll('(', '')
+    .replaceAll(')', '')
+    .replaceAll(',', '')
+    .trim();
 };
 
 const initialIdentity = execSync(`dfx identity whoami`, {
   encoding: 'utf-8',
 });
 
+const identityPrincipal = execSync(`dfx identity get-principal`, {
+  encoding: 'utf-8',
+}).trim();
+
 console.log('Initial Identity:', initialIdentity);
 
-const { privateKeyHex, publicKeyHex } = generateKeyPair('test');
+const aesSymmetricEncryptionKeyHex =
+  generateAesSymmetricEncryptionKeyHex('test');
 
 deployCanister(
-  `'(record {public_key_hex="${publicKeyHex}"; local_mode=true})'`,
+  buildArgument({
+    aes_symmetric_encryption_key_hex: aesSymmetricEncryptionKeyHex,
+    local_mode: true,
+    controller_principal_id: identityPrincipal,
+  }),
   true
 );
 
-// call the init_ecdsa_key method in the canister
-const command = `dfx canister call asymmetric_identity_certifier init_ecdsa_key`;
-execSync(command, { stdio: 'inherit', encoding: 'utf-8' });
-
-// call the get_ecdsa_public_key_hex method in the canister
-const pubKeyCommand = `dfx canister call asymmetric_identity_certifier get_ecdsa_public_key_hex`;
 const pubKeyResult = cleanupStringResponse(
-  execSync(pubKeyCommand, {
+  execSync(`dfx canister call asymmetric_identity_certifier init_ecdsa_key`, {
     encoding: 'utf-8',
   })
+);
+
+// call the get_ecdsa_public_key_hex method in the canister
+
+const getPubKeyResult = cleanupStringResponse(
+  execSync(
+    `dfx canister call asymmetric_identity_certifier get_ecdsa_public_key_hex`,
+    {
+      encoding: 'utf-8',
+    }
+  )
+);
+
+assert(
+  pubKeyResult === getPubKeyResult,
+  'Get public key result does not match init public key result'
 );
 
 console.log('Public Key:', pubKeyResult);
@@ -46,22 +72,41 @@ execSync('dfx identity use asymmetric_identity_certifier_test', {
   encoding: 'utf-8',
 });
 
-// call the get_ecdsa_public_key_hex method in the canister
-const certificateCommand = `dfx canister call asymmetric_identity_certifier get_ecdsa_public_key_hex`;
-const certificateResult = cleanupStringResponse(
+// call the get_certified_identity method in the canister
+const certificateCommand = `dfx canister call asymmetric_identity_certifier get_certified_identity`;
+const encryptedCertificate = cleanupStringResponse(
   execSync(certificateCommand, {
     encoding: 'utf-8',
   })
 );
 
-console.log('Certificate:', certificateResult);
+console.log('Encrypted Certificate:', encryptedCertificate);
+
+// cleanup identities
+
+execSync(`dfx identity use ${initialIdentity}`, {
+  stdio: 'inherit',
+  encoding: 'utf-8',
+});
 
 // delete the identity asymmetric_identity_certifier_test
-execSync(
-  `dfx identity use ${initialIdentity} && dfx identity remove asymmetric_identity_certifier_test`,
-  {
-    stdio: 'inherit',
-    encoding: 'utf-8',
-  }
+execSync(`dfx identity remove asymmetric_identity_certifier_test`, {
+  stdio: 'inherit',
+  encoding: 'utf-8',
+});
+
+// Decrypt and log the certificate
+const decryptedCertificate = decryptCertificate(
+  encryptedCertificate,
+  aesSymmetricEncryptionKeyHex
 );
 
+console.log(
+  'Decrypted Certificate:',
+  JSON.stringify(decryptedCertificate, null, 2)
+);
+
+// validate the signature
+const isValid = validateSignature(decryptedCertificate, pubKeyResult);
+console.log('Is Valid:', isValid);
+assert(isValid, 'Signature is not valid');

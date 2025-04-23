@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "npx tsx scripts/test.mts",
-    "get-key-pair": "npx tsx scripts/get-key-pair.mts",
+    "get-deploy-args": "npx tsx scripts/get-deploy-args.mts",
     "deploy": "npx tsx scripts/deploy.mts",
     "generate": "scripts/generate_did.sh && dfx generate"
   },
@@ -22,9 +22,11 @@
   "homepage": "https://github.com/ClainoLabs/asymmetric-identity-certifier#readme",
   "devDependencies": {
     "@dfinity/candid": "^2.4.1",
-    "@noble/secp256k1": "^2.2.3",
     "@types/node": "^22.14.1",
     "clipboardy": "^4.0.0",
     "inquirer": "^12.5.2"
+  },
+  "dependencies": {
+    "@dfinity/identity": "^2.4.1"
   }
 }

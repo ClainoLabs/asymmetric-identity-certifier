@@ -1,10 +1,17 @@
 import { execSync } from 'child_process';
 import inquirer from 'inquirer';
-import { getKeyPairFromInput } from '../utils/get-key-pair-from-input.js';
+import { getAesSymmetricEncryptionKey } from './get-aes-key-from-input.js';
+import { getIdentityFromSeed } from './identity-from-seed.js';
+import { promptIdentitySeed } from './identity-from-seed.js';
+import type { InitArgs } from '../../src/declarations/asymmetric_identity_certifier.did.js';
+
+export const buildArgument = (input: InitArgs) => {
+  return `'(record {aes_symmetric_encryption_key_hex="${input.aes_symmetric_encryption_key_hex}"; local_mode=${input.local_mode}; controller_principal_id="${input.controller_principal_id}"})'`;
+};
 
 export const captureDeployArgs = async () => {
   // 1. Ask for the key pair input
-  const { publicKeyHex } = await getKeyPairFromInput();
+  const aesSymmetricEncryptionKeyHex = await getAesSymmetricEncryptionKey();
 
   // 2. Ask whether to deploy in local mode
   const { localMode } = await inquirer.prompt<{
@@ -18,7 +25,17 @@ export const captureDeployArgs = async () => {
     },
   ]);
 
-  const argument = `'(record {public_key_hex="${publicKeyHex}"; local_mode=${localMode}})'`;
+  const identitySeed = await promptIdentitySeed();
+
+  const identity = getIdentityFromSeed(identitySeed);
+
+  const controller = identity.getPrincipal().toText();
+
+  const argument = buildArgument({
+    aes_symmetric_encryption_key_hex: aesSymmetricEncryptionKeyHex,
+    local_mode: localMode,
+    controller_principal_id: controller,
+  });
 
   const { isReinstall } = await inquirer.prompt<{
     isReinstall: boolean;

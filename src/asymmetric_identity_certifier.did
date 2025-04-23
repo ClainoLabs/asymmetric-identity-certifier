@@ -1,7 +1,11 @@
-type InitArgs = record { local_mode : bool; public_key_hex : text };
+type InitArgs = record {
+  aes_symmetric_encryption_key_hex : text;
+  controller_principal_id : text;
+  local_mode : bool;
+};
 service : (InitArgs) -> {
   documentation : () -> (text) query;
   get_certified_identity : () -> (text);
   get_ecdsa_public_key_hex : () -> (text) query;
-  init_ecdsa_key : () -> ();
+  init_ecdsa_key : () -> (text);
 }
