@@ -49,16 +49,23 @@ export const captureDeployArgs = async () => {
     },
   ]);
 
-  return { argument, isReinstall };
+  const network = localMode ? undefined : 'ic';
+
+  return { argument, isReinstall, network };
 };
 
-export const deployCanister = (argument: string, isReinstall: boolean) => {
+export const deployCanister = (
+  argument: string,
+  isReinstall: boolean,
+  network?: string
+) => {
   // 3. Deploy the canister
   const command = [
     'dfx deploy asymmetric_identity_certifier ',
     isReinstall ? '--mode reinstall --yes ' : '',
     '--argument ',
     argument,
+    network ? ` --network ${network} ` : '',
   ].join('');
 
   console.log('Deploying canister with command:\n', command, '\n');

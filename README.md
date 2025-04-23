@@ -22,7 +22,7 @@ This canister serves as a middle ground between completely open identity validat
 2. **Certificate Generation**
 
    - When a user calls `get_certified_identity`, the canister:
-     - Creates a certificate containing their principal ID and current timestamp
+     - Creates a certificate containing their principal ID and current timestamp in seconds from 1970-01-01
      - Signs this certificate using ECDSA (secp256k1)
      - Encrypts the entire certificate (including signature) using AES-GCM
      - Returns the encrypted data as a hex string
@@ -32,7 +32,7 @@ This canister serves as a middle ground between completely open identity validat
    - The encrypted certificate can be decrypted using the AES key
    - The decrypted certificate contains:
      - The user's principal ID
-     - A timestamp of when the certificate was issued
+     - A timestamp of when the certificate was issued in seconds from 1970-01-01
      - An ECDSA signature from the canister
 
 4. **Signature Validation**
@@ -136,6 +136,13 @@ npm run deploy
 ```bash
 npm test
 ```
+
+### Cycles
+
+The canister consumes cycles for each certificate generation and signature verification.
+The cost for each certificate generation on mainnet on 2025-04-24 is 26_200_000_000 (26.2B) cycles (approximately $0.035).
+Most of it comes from the signature generation (`sign_with_ecdsa`).
+See costs at [https://internetcomputer.org/docs/references/t-sigs-how-it-works#fees-for-the-t-ecdsa-production-key](https://internetcomputer.org/docs/references/t-sigs-how-it-works#fees-for-the-t-ecdsa-production-key)
 
 ## Contributing
 

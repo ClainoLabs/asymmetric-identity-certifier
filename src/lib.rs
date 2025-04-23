@@ -166,7 +166,6 @@ struct Certificate {
 
 #[derive(CandidType, Serialize)]
 struct CertifiedIdentity {
-    principal_id: String,
     certificate: Certificate,
     issuer_signature: String,
 }
@@ -180,11 +179,10 @@ async fn get_certified_identity() -> String {
         ic_cdk::trap("Anonymous principal not allowed to make calls");
     }
 
-    let caller_str = caller.to_string();
-    let current_time = api::time();
+    let current_time = api::time() / 1_000_000_000; // Convert nanoseconds to seconds
 
     let certificate = Certificate {
-        principal: caller_str.clone(),
+        principal: caller.to_string(),
         timestamp: current_time,
     };
 
@@ -198,7 +196,6 @@ async fn get_certified_identity() -> String {
     let signature = sign_certificate(certificate_hash).await;
 
     let identity = CertifiedIdentity {
-        principal_id: caller_str,
         certificate,
         issuer_signature: hex::encode(signature),
     };
@@ -318,7 +315,7 @@ This canister provides a way to certify Internet Computer identities using asymm
    - The encrypted certificate can be decrypted using the AES key
    - The decrypted certificate contains:
      - The user's principal ID
-     - A timestamp of when the certificate was issued
+     - A timestamp of when the certificate was issued in seconds from 1970-01-01
      - An ECDSA signature from the canister
 
 4. **Signature Validation**

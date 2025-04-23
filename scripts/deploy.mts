@@ -1,5 +1,5 @@
 import { captureDeployArgs, deployCanister } from './utils/deploy-utils.js';
 
-const { argument, isReinstall } = await captureDeployArgs();
+const { argument, isReinstall, network } = await captureDeployArgs();
 
-deployCanister(argument, isReinstall);
+deployCanister(argument, isReinstall, network);
